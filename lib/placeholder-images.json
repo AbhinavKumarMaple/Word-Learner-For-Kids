@@ -1,0 +1,22 @@
+{
+  "placeholderImages": [
+    {
+      "id": "hero-reading",
+      "description": "A child happily reading a book in a sunlit room.",
+      "imageUrl": "https://images.unsplash.com/photo-1599689868384-59cb2b01bb21?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwyfHxjaGlsZCUyMHJlYWRpbmd8ZW58MHx8fHwxNzY3OTQwNDA4fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "child reading"
+    },
+    {
+      "id": "progress-chart",
+      "description": "An abstract representation of a progress chart with an upward trend.",
+      "imageUrl": "https://images.unsplash.com/photo-1762427354397-854a52e0ded7?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw2fHxwcm9ncmVzcyUyMGNoYXJ0fGVufDB8fHx8MTc2Nzk1ODE0MHww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "progress chart"
+    },
+    {
+      "id": "congratulations",
+      "description": "Colorful confetti and celebratory elements.",
+      "imageUrl": "https://images.unsplash.com/photo-1571498939126-02be924e5609?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw4fHxjZWxlYnJhdGlvbiUyMGNvbmZldHRpfGVufDB8fHx8MTc2NzkzMzMwMnww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "celebration confetti"
+    }
+  ]
+}
