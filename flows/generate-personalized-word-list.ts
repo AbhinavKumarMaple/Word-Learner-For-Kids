@@ -64,7 +64,9 @@ const generatePersonalizedWordListFlow = ai.defineFlow(
     outputSchema: GeneratePersonalizedWordListOutputSchema,
   },
   async input => {
+    console.log("input",input)
     const {output} = await generatePersonalizedWordListPrompt(input);
+    console.log("output",output)
     return output!;
   }
 );

@@ -25,7 +25,7 @@ const GeneratePersonalizedWordListInputSchema = z.object({
 export type GeneratePersonalizedWordListInput = z.infer<typeof GeneratePersonalizedWordListInputSchema>;
 
 const GeneratePersonalizedWordListOutputSchema = z.object({
-  wordList: z.array(z.string()).describe('A list of approximately 50 spelling words tailored to the user.'),
+  wordList: z.array(z.string()).describe('A list of approximately {{wordCount}} spelling words tailored to the user.'),
 });
 export type GeneratePersonalizedWordListOutput = z.infer<typeof GeneratePersonalizedWordListOutputSchema>;
 
@@ -54,7 +54,7 @@ const generatePersonalizedWordListPrompt = ai.definePrompt({
   - Difficulty: {{difficulty}}
   - Vocabulary Type: {{vocabType}}
   - Past Performance Data: {{{pastPerformanceData}}}
-  - Word Count: {{wordCount}}
+  - must generate {{wordCount}} words
 
   You MUST return the list of words as a JSON object with a single key "wordList" containing an array of strings.
 

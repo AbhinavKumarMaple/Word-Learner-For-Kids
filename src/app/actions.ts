@@ -39,8 +39,22 @@ export async function categorizeMistakes(data: CategorizeMistakesInput) {
 }
 
 export async function generateSentence(data: GenerateTypingSentenceInput) {
+  console.log('SERVER ACTION generateSentence INPUT:', JSON.stringify(data, null, 2));
   try {
-    const result = await generateTypingSentenceFlow(data);
+    let randomWord: string | undefined;
+    try {
+       const response = await fetch('https://random-word-api.herokuapp.com/word?number=1', { cache: 'no-store' });
+       if (response.ok) {
+           const words = await response.json();
+           if (Array.isArray(words) && words.length > 0) {
+               randomWord = words[0];
+           }
+       }
+    } catch (e) {
+        console.warn('Failed to fetch random word:', e);
+    }
+
+    const result = await generateTypingSentenceFlow({ ...data, randomWord });
     return { sentence: result.sentence };
   } catch (error) {
     console.error('AI sentence generation failed:', error);
