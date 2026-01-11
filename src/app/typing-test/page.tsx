@@ -46,6 +46,7 @@ export default function TypingTestPage() {
 
   const [time, setTime] = useState(0);
   const [errorCount, setErrorCount] = useState(0);
+  const [totalKeystrokes, setTotalKeystrokes] = useState(0);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
   
   const [isClient, setIsClient] = useState(false);
@@ -103,6 +104,7 @@ export default function TypingTestPage() {
       setUserInput('');
       setTime(0);
       setErrorCount(0);
+      setTotalKeystrokes(0);
       setTestStatus('ready');
       if (values.mode === 'speech') {
         speak(result.sentence);
@@ -172,6 +174,8 @@ export default function TypingTestPage() {
       return;
     }
 
+    setTotalKeystrokes((prev) => prev + (value.length - userInput.length));
+
     const lastTypedChar = value[value.length - 1];
     const expectedChar = sentence[value.length - 1];
 
@@ -200,8 +204,8 @@ export default function TypingTestPage() {
             correctChars++;
         }
     }
-    const accuracy = (correctChars / sentence.length) * 100;
-
+    const accuracy = totalKeystrokes > 0 ? Math.max(0, ((totalKeystrokes - errorCount) / totalKeystrokes) * 100) : 0;
+    
     const result: TypingTestResult = {
         date: new Date().toISOString(),
         wpm,
@@ -231,6 +235,7 @@ export default function TypingTestPage() {
     setUserInput('');
     setTime(0);
     setErrorCount(0);
+    setTotalKeystrokes(0);
   }
 
   const restartTest = () => {
@@ -242,18 +247,12 @@ export default function TypingTestPage() {
   }
 
   const wpm = time > 0 ? Math.round((userInput.length / 5) / (time / 60)) : 0;
-  const accuracy = sentence.length > 0 ? ((userInput.length - errorCount) / userInput.length) * 100 : 100;
+  const accuracy = totalKeystrokes > 0 ? Math.max(0, ((totalKeystrokes - errorCount) / totalKeystrokes) * 100) : 100;
 
 
   if (testStatus === 'finished') {
     const finalWpm = Math.round((sentence.split(' ').length / time) * 60);
-    let correctChars = 0;
-    for(let i = 0; i < userInput.length; i++) {
-        if(userInput[i] === sentence[i]) {
-            correctChars++;
-        }
-    }
-    const finalAccuracy = (correctChars / sentence.length) * 100;
+    const finalAccuracy = totalKeystrokes > 0 ? Math.max(0, ((totalKeystrokes - errorCount) / totalKeystrokes) * 100) : 0;
 
     return (
       <div className="container mx-auto max-w-3xl px-4 py-8 text-center">
