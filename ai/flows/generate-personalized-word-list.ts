@@ -16,7 +16,7 @@ const GeneratePersonalizedWordListInputSchema = z.object({
   pastPerformanceData: z
     .string()
     .describe(
-      'The user past performance data including correct and incorrect words, progress metrics, areas of improvement, usage dates, typing speed, and other stats. Maximum 300 words.'
+      'The user past performance data including correct and incorrect words. CORRECT WORDS MUST BE EXCLUDED FROM THE GENERATED LIST.'
     ),
   difficulty: z.string().optional().describe('The difficulty level of the words (easy, medium, hard).'),
   vocabType: z.string().optional().describe('The vocabulary type (e.g., science, history, general).'),
@@ -42,6 +42,8 @@ const generatePersonalizedWordListPrompt = ai.definePrompt({
   Your task is to generate a list of approximately 30 spelling words based on the user's inputs.
   The word list should be challenging yet appropriate for the user's skill level.
 
+  CRITICAL INSTRUCTION: Analyze the Past Performance Data. You MUST EXCLUDE any words the user has previously spelled correctly (marked as correct/right). Do not repeat words the user has already mastered. Focus on generating new words or words the user previously struggled with.
+
   User Inputs:
   - Grade Level: {{{gradeLevel}}}
   - Difficulty: {{difficulty}}
@@ -52,7 +54,7 @@ const generatePersonalizedWordListPrompt = ai.definePrompt({
 
   Example Output:
   {
-    "wordList": ["excellent", "bicycle", "enormous", "knowledge", "extraordinary", "courageous", "magnificent", "delicious", "beautiful", "wonderful", "fantastic", "amazing", "incredible", "terrific", "superb", "brilliant", "outstanding", "fabulous", "marvelous", "splendid", "glorious", "divine", "heavenly", "angelic", "cherubic", "seraphic", "beatific", "blessed", "holy", "sacred"]
+    "wordList": ["excellent", "bicycle"]
   }
   `,
 });
