@@ -1,3 +1,4 @@
+
 'use server';
 
 import { generatePersonalizedWordList, type GeneratePersonalizedWordListInput } from '@/ai/flows/generate-personalized-word-list';
@@ -10,6 +11,7 @@ const spellingFormSchema = z.object({
   difficulty: z.enum(['easy', 'medium', 'hard']),
   vocabType: z.enum(['general', 'science', 'history']),
   pastPerformanceData: z.string(),
+  wordCount: z.number().min(1).max(100).optional(),
 });
 
 export async function generateWords(data: GeneratePersonalizedWordListInput) {
