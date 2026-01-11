@@ -9,8 +9,10 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Progress } from '@/components/ui/progress';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { saveSpellingTestResult, type SpellingTestResult } from '@/lib/storage';
+import { saveSpellingTestResult, type SpellingTestResult, getPastPerformanceData } from '@/lib/storage';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
+import { generateWords } from '@/app/actions';
+import { Loader2 } from 'lucide-react';
 import {
   Tooltip,
   TooltipContent,
@@ -27,7 +29,8 @@ const MAX_ATTEMPTS = 3;
 export default function SpellingTestPage() {
   const router = useRouter();
   const [wordList, setWordList] = useState<string[]>([]);
-  const [testConfig, setTestConfig] = useState<{ gradeLevel: number; difficulty: string; vocabType: string } | null>(null);
+  const [testConfig, setTestConfig] = useState<{ gradeLevel: number; difficulty: string; vocabType: string; wordCount?: number } | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
   
   const [currentWordIndex, setCurrentWordIndex] = useState(0);
   const [userInput, setUserInput] = useState('');
@@ -211,6 +214,35 @@ export default function SpellingTestPage() {
     }
   };
 
+  const handleRestart = async () => {
+    if (!testConfig) return;
+    setIsLoading(true);
+    try {
+        const pastPerformanceData = getPastPerformanceData();
+        // @ts-ignore - wordCount might be missing in older configs, but that's fine as per update
+        const result = await generateWords({ ...testConfig, pastPerformanceData });
+        
+        if (result.wordList && result.wordList.length > 0) {
+            sessionStorage.setItem('lexiLearnWordList', JSON.stringify(result.wordList));
+             // Update state to restart
+            setWordList(result.wordList);
+            setWordHistory(result.wordList.map((word: string) => ({ word, correct: null, userInput: '' })));
+            setCurrentWordIndex(0);
+            setUserInput('');
+            setTestState('ongoing');
+            setAttempts(0);
+            setWordStartTime(Date.now());
+            setTotalTypingTime(0);
+            setTotalCharsTyped(0);
+            startWord(result.wordList[0]);
+        }
+    } catch (error) {
+        console.error("Failed to restart test", error);
+    } finally {
+        setIsLoading(false);
+    }
+  };
+
   if (wordList.length === 0) {
     return <div className="flex h-screen items-center justify-center">Loading test...</div>;
   }
@@ -261,7 +293,18 @@ export default function SpellingTestPage() {
             </Tooltip>
             <Tooltip>
                 <TooltipTrigger asChild>
-                  <Button onClick={() => router.push('/')} variant="outline">Start a New Test</Button>
+                  <Button onClick={handleRestart} disabled={isLoading} className="bg-green-600 hover:bg-green-700">
+                    {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : null} 
+                    Start New Test (Same Config)
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                    <p>Generate new words with current settings</p>
+                </TooltipContent>
+            </Tooltip>
+            <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button onClick={() => router.push('/')} variant="outline">Back to Home</Button>
                 </TooltipTrigger>
                 <TooltipContent>
                     <p>Return to the home page</p>

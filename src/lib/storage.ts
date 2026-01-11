@@ -4,7 +4,7 @@ const SPELLING_HISTORY_KEY = 'lexiLearnHistory';
 const TYPING_HISTORY_KEY = 'lexiLearnTypingHistory';
 const ANALYSIS_KEY = 'lexiLearnAnalysis';
 const MAX_HISTORY_ITEMS = 50;
-const MAX_PERFORMANCE_WORDS = 300;
+const MAX_PERFORMANCE_WORDS = 1000;
 
 export interface SpellingTestResult {
   date: string;

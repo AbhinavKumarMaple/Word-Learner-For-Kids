@@ -17,12 +17,16 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { useRouter } from 'next/navigation';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Input } from '@/components/ui/input';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 const formSchema = z.object({
   difficulty: z.enum(['easy', 'medium', 'hard']),
   topic: z.enum(['general', 'science', 'history', 'facts']),
   mode: z.enum(['read', 'speech']),
+  wordCount: z.coerce.number().min(5).max(100).default(20),
 });
+
+const STORED_CONFIG_KEY = 'lexiLearnTypingConfig';
 
 type FormValues = z.infer<typeof formSchema>;
 
@@ -59,8 +63,23 @@ export default function TypingTestPage() {
       difficulty: 'medium',
       topic: 'general',
       mode: 'read',
+      wordCount: 20,
     },
   });
+
+  useEffect(() => {
+     if (isClient) {
+        const stored = localStorage.getItem(STORED_CONFIG_KEY);
+        if (stored) {
+           try {
+              const parsed = JSON.parse(stored);
+              form.reset(parsed);
+           } catch(e) {
+              console.error("Failed to parse stored typing config", e);
+           }
+        }
+     }
+  }, [isClient, form]);
 
   const speak = useCallback((text: string) => {
     if (synth && text) {
@@ -72,6 +91,7 @@ export default function TypingTestPage() {
   }, [synth]);
 
   async function onSubmit(values: FormValues) {
+    localStorage.setItem(STORED_CONFIG_KEY, JSON.stringify(values));
     setTestStatus('loading');
     setTestConfig(values);
     try {
@@ -119,6 +139,25 @@ export default function TypingTestPage() {
       stopTimer();
     }
     return () => stopTimer();
+  }, [testStatus]);
+
+  // Keyboard shortcuts
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+        if (testStatus === 'finished') {
+             if (e.key === 'r' && (e.ctrlKey || e.metaKey)) {
+                e.preventDefault();
+                restartTest();
+             } else if (e.key === 'n' && (e.ctrlKey || e.metaKey)) {
+                 e.preventDefault();
+                 resetTest();
+             }
+        }
+        // Add more shortcuts as needed
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
   }, [testStatus]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -194,6 +233,14 @@ export default function TypingTestPage() {
     setErrorCount(0);
   }
 
+  const restartTest = () => {
+     if (testConfig) {
+        onSubmit(testConfig);
+     } else {
+        resetTest();
+     }
+  }
+
   const wpm = time > 0 ? Math.round((userInput.length / 5) / (time / 60)) : 0;
   const accuracy = sentence.length > 0 ? ((userInput.length - errorCount) / userInput.length) * 100 : 100;
 
@@ -234,8 +281,27 @@ export default function TypingTestPage() {
                     </div>
                 </div>
                 <div className="flex justify-center gap-4">
-                  <Button onClick={resetTest}>New Practice</Button>
-                  <Button variant="outline" onClick={() => router.push('/progress')}>View Progress</Button>
+                  <TooltipProvider>
+                    <Tooltip>
+                        <TooltipTrigger asChild>
+                             <Button onClick={restartTest} className="bg-primary text-primary-foreground hover:bg-primary/90">Restart (Same Settings)</Button>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                            <p>Restart with current config (Ctrl+R)</p>
+                        </TooltipContent>
+                    </Tooltip>
+                    
+                    <Tooltip>
+                         <TooltipTrigger asChild>
+                             <Button onClick={resetTest} variant="secondary">New Config</Button>
+                         </TooltipTrigger>
+                         <TooltipContent>
+                             <p>Setup a new test (Ctrl+N)</p>
+                         </TooltipContent>
+                    </Tooltip>
+
+                    <Button variant="outline" onClick={() => router.push('/progress')}>View Progress</Button>
+                  </TooltipProvider>
                 </div>
             </CardContent>
         </Card>
@@ -347,6 +413,20 @@ export default function TypingTestPage() {
                       )}
                     />
                   </div>
+
+                  <FormField
+                    control={form.control}
+                    name="wordCount"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Word Count (Approx. 5-100)</FormLabel>
+                        <FormControl>
+                          <Input type="number" min="5" max="100" placeholder="e.g., 20" {...field} />
+                        </FormControl>
+                      </FormItem>
+                    )}
+                  />
+                  
                   <Button type="submit" className="w-full" disabled={testStatus === 'loading'}>
                     {testStatus === 'loading' ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Generating...</> : 'Start Practice'}
                   </Button>

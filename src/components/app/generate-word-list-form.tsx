@@ -34,7 +34,10 @@ const formSchema = z.object({
   gradeLevel: z.coerce.number().int().min(1, 'Grade must be at least 1').max(12, 'Grade must be at most 12'),
   difficulty: z.enum(['easy', 'medium', 'hard']),
   vocabType: z.enum(['general', 'science', 'history']),
+  wordCount: z.coerce.number().int().min(5).max(100).default(30),
 });
+
+const STORED_CONFIG_KEY = 'lexiLearnUserConfig';
 
 type FormValues = z.infer<typeof formSchema>;
 
@@ -54,12 +57,28 @@ export function GenerateWordListForm() {
       gradeLevel: 5,
       difficulty: 'medium',
       vocabType: 'general',
+      wordCount: 30,
     },
   });
+
+  useEffect(() => {
+    if (isClient) {
+      const stored = localStorage.getItem(STORED_CONFIG_KEY);
+      if (stored) {
+        try {
+          const parsed = JSON.parse(stored);
+          form.reset(parsed);
+        } catch (e) {
+          console.error("Failed to parse stored config", e);
+        }
+      }
+    }
+  }, [isClient, form]);
 
   async function onSubmit(values: FormValues) {
     setIsLoading(true);
     try {
+      localStorage.setItem(STORED_CONFIG_KEY, JSON.stringify(values));
       const pastPerformanceData = getPastPerformanceData();
       const result = await generateWords({ ...values, pastPerformanceData });
 
@@ -171,6 +190,21 @@ export function GenerateWordListForm() {
             )}
           />
         </div>
+        
+        <FormField
+            control={form.control}
+            name="wordCount"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Word Count (5-100)</FormLabel>
+                <FormControl>
+                  <Input type="number" min="5" max="100" placeholder="e.g., 30" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+        />
+
         <TooltipProvider>
           <Tooltip>
             <TooltipTrigger asChild>

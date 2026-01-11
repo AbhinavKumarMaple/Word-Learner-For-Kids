@@ -14,6 +14,7 @@ import { z } from 'genkit';
 const GenerateTypingSentenceInputSchema = z.object({
   difficulty: z.enum(['easy', 'medium', 'hard']).describe('The difficulty level of the sentence.'),
   topic: z.enum(['general', 'science', 'history', 'facts']).describe('The topic of the sentence.'),
+  wordCount: z.number().optional().default(20).describe('The approximate number of words in the sentence.'),
 });
 export type GenerateTypingSentenceInput = z.infer<typeof GenerateTypingSentenceInputSchema>;
 
@@ -34,10 +35,12 @@ const generateTypingSentencePrompt = ai.definePrompt({
   output: { schema: GenerateTypingSentenceOutputSchema },
   prompt: `You are an expert content creator for educational typing games.
   Generate a single, interesting, and grammatically correct sentence for a typing test based on the following criteria.
-  The sentence should be between 15 and 30 words long. It should not contain overly complex punctuation, but commas and periods are acceptable.
+  The sentence should be approximately {{wordCount}} words long. It should not contain overly complex punctuation, but commas and periods are acceptable.
+  If the word count is large, you may generate multiple sentences.
 
   Difficulty: {{{difficulty}}}
   Topic: {{{topic}}}
+  Word Count: {{wordCount}}
 
   Example for 'hard' difficulty and 'science' topic: "The process of photosynthesis in plants converts light energy into chemical energy, creating glucose and oxygen as byproducts."
   Example for 'easy' difficulty and 'general' topic: "The quick brown fox jumps over the lazy dog near the river."

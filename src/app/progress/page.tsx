@@ -42,6 +42,10 @@ const typingChartConfig = {
     label: 'Accuracy',
     color: 'hsl(var(--chart-2))',
   },
+  errors: {
+    label: 'Errors',
+    color: 'hsl(var(--chart-3))',
+  },
 } satisfies ChartConfig;
 
 export default function ProgressPage() {
@@ -133,6 +137,7 @@ export default function ProgressPage() {
     date: format(new Date(item.date), 'MMM d'),
     wpm: Math.round(item.wpm),
     accuracy: Math.round(item.accuracy),
+    errors: item.errorCount || 0,
   })).reverse(), [typingHistory]);
 
   const mistakeCounts = useMemo(() => spellingHistory
@@ -354,6 +359,18 @@ export default function ProgressPage() {
                           </BarChart>
                         </ChartContainer>
                       </div>
+                      <div className="md:col-span-2">
+                        <h3 className="mb-4 text-center font-medium">Errors per Session</h3>
+                         <ChartContainer config={typingChartConfig} className="h-[250px] w-full">
+                          <BarChart data={typingChartData} margin={{ top: 20, right: 20, bottom: 20, left: 0 }}>
+                            <CartesianGrid vertical={false} />
+                            <XAxis dataKey="date" tickLine={false} tickMargin={10} axisLine={false} />
+                            <YAxis tickLine={false} axisLine={false} allowDecimals={false} />
+                            <ChartTooltip cursor={false} content={<ChartTooltipContent indicator="dot" />} />
+                            <Bar dataKey="errors" fill="var(--color-errors)" radius={4} />
+                          </BarChart>
+                        </ChartContainer>
+                      </div>
                     </>
                   ) : (
                     <div className="col-span-2 flex h-[300px] flex-col items-center justify-center text-center">
@@ -382,6 +399,7 @@ export default function ProgressPage() {
                                     <TableHead>Topic</TableHead>
                                     <TableHead className="text-right">WPM</TableHead>
                                     <TableHead className="text-right">Accuracy</TableHead>
+                                    <TableHead className="text-right">Errors</TableHead>
                                     <TableHead className="text-right">Time</TableHead>
                                 </TableRow>
                             </TableHeader>
@@ -394,6 +412,7 @@ export default function ProgressPage() {
                                         <TableCell className="capitalize">{test.topic}</TableCell>
                                         <TableCell className="text-right font-medium">{test.wpm.toFixed(0)}</TableCell>
                                         <TableCell className="text-right font-medium">{test.accuracy.toFixed(0)}%</TableCell>
+                                        <TableCell className="text-right font-medium">{test.errorCount}</TableCell>
                                         <TableCell className="text-right font-medium">{test.time}s</TableCell>
                                     </TableRow>
                                 ))}
