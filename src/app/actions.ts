@@ -39,7 +39,6 @@ export async function categorizeMistakes(data: CategorizeMistakesInput) {
 }
 
 export async function generateSentence(data: GenerateTypingSentenceInput) {
-  console.log('SERVER ACTION generateSentence INPUT:', JSON.stringify(data, null, 2));
   try {
     let randomWord: string | undefined;
     try {

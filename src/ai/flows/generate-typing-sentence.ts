@@ -56,9 +56,7 @@ const generateTypingSentenceFlow = ai.defineFlow(
     outputSchema: GenerateTypingSentenceOutputSchema,
   },
   async input => {
-    console.log('GENERATE TYPING SENTENCE FLOW INPUT (SRC):', JSON.stringify(input, null, 2));
-    const result = await generateTypingSentencePrompt(input);
-    console.log('GENERATE TYPING SENTENCE PROMPT RESULT (SRC):', JSON.stringify(result, null, 2));
-    return result.output!;
+    const { output } = await generateTypingSentencePrompt(input);
+    return output!;
   }
 );
